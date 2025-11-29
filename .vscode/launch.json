@@ -1,0 +1,18 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Debug iOS (physical device)",
+            "type": "reactnative",
+            "request": "launch",
+            "platform": "ios",
+            "target": "device",
+            "runArguments": [
+                "--udid",
+                "4d5fb118c759c9bc33987851b2d5920e49a8df17"
+            ],
+            "cwd": "${workspaceFolder}",
+            "sourceMaps": true
+        }
+    ]
+}
