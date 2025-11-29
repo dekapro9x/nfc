@@ -571,30 +571,32 @@ extension PACEHandler {
     ///   - key: The ECP_PKEY public key to encode
     /// - Throws: Error if unable to encode
     /// - Returns: the encoded public key in tlv format
-    func encodePublicKey( oid : String, key : OpaquePointer ) throws -> [UInt8] {
-        let encodedOid = oidToBytes(oid:oid, replaceTag: false)
+    func encodePublicKey(oid: String, key: OpaquePointer) throws -> [UInt8] {
+        let encodedOid = oidToBytes(oid: oid, replaceTag: false)
+
         guard let pubKeyData = OpenSSLUtils.getPublicKeyData(from: key) else {
-            Logger.pace.error( "PACEHandler: encodePublicKey() - Unable to get public key data" )
+            Logger.pace.error("PACEHandler: encodePublicKey() - Unable to get public key data")
             throw NFCPassportReaderError.InvalidDataPassed("Unable to get public key data")
         }
 
-        let keyType = EVP_PKEY_get_base_id( key )
-        let tag : TKTLVTag
-        if keyType == EVP_PKEY_DH || keyType == EVP_PKEY_DHX {
-            tag = 0x84
-        } else {
-            tag = 0x86
-        }
+        // ❌ BỎ: let keyType = EVP_PKEY_get_base_id(key)
+
+        // ✅ Thay bằng check runtime: nếu lấy được DH* thì coi như DH
+        let isDH = (EVP_PKEY_get0_DH(key) != nil)
+
+        let tag: TKTLVTag = isDH ? 0x84 : 0x86
 
         guard let encOid = TKBERTLVRecord(from: Data(encodedOid)) else {
             throw NFCPassportReaderError.InvalidASN1Value
         }
-        let encPub = TKBERTLVRecord(tag:tag, value: Data(pubKeyData))
-        let record = TKBERTLVRecord(tag: 0x7F49, records:[encOid, encPub])
+
+        let encPub = TKBERTLVRecord(tag: tag, value: Data(pubKeyData))
+        let record = TKBERTLVRecord(tag: 0x7F49, records: [encOid, encPub])
         let data = record.data
 
         return [UInt8](data)
     }
+
 
     /// Computes a key seed based on an MRZ key
     /// - Parameter the mrz key
