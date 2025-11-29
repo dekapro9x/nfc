@@ -7,7 +7,7 @@
 
 import { StatusBar, useColorScheme } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
-
+import 'react-native-safe-area-context';
 import HomeScreen from './lib/home/home_screen';
 
 function App() {
